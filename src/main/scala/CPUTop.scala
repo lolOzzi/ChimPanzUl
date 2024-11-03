@@ -26,14 +26,21 @@ class CPUTop extends Module {
   val registerFile = Module(new RegisterFile())
   val controlUnit = Module(new ControlUnit())
   val alu = Module(new ALU())
+  val alu2 = Module(new ALU())
+
 
   //Connecting the modules
-  //programCounter.io.run := io.run
-  //programMemory.io.address := programCounter.io.programCounter
+  programCounter.io.run := io.run
+  programMemory.io.address := programCounter.io.programCounter
+  val inst = programMemory.io.instructionRead
+  controlUnit.io.opcode := inst(31, 28)
+  registerFile.io.aSel := inst(27, 23)
+  registerFile.io.bSel := inst(22, 18)
+  registerFile.io.writeSel := Mux(controlUnit.io.RegDst,inst(22, 18), inst(18, 13))
+  val imd = inst(17, 0).asUInt()
 
-  ////////////////////////////////////////////
-  //Continue here with your connections
-  ////////////////////////////////////////////
+
+
 
   //This signals are used by the tester for loading the program to the program memory, do not touch
   programMemory.io.testerAddress := io.testerProgMemAddress

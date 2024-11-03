@@ -7,7 +7,7 @@ class ALU extends Module {
     val y = Input(UInt(32.W))
     val sel = Input(UInt(3.W))
     val res = Output(UInt(32.W))
-    val comp = Output(UInt(1.W))
+    val comp = Output(Bool())
   })
 
   io.res := 0.U
@@ -17,8 +17,10 @@ class ALU extends Module {
     is(0.U) { io.res := io.x + io.y }
     is(1.U) { io.res := io.x - io.y }
     is(2.U) { io.res := io.x * io.y }
-    is(3.U) { io.comp := io.x === io.y }
-    is(4.U) { io.comp := io.x === 0.U  }
+    is(3.U) { io.comp := io.x === io.y}
+    is(4.U) { io.comp := io.x === 0.U }
+    is(5.U) { io.res := io.x}
+    is(6.U) { io.comp := true.B}
   }
 
 }
