@@ -11,9 +11,11 @@ class RegisterFile extends Module {
     val writeEnable = Input(Bool())
     val a = Output(UInt(32.W))
     val b = Output(UInt(32.W))
+    val r3 = Output(UInt(32.W))
   })
   //Implement this module here
-  private val registerFile = Reg(Vec(32, UInt(32.W)))
+  val registerFile = Reg(Vec(32, UInt(32.W)))
+  io.r3 := registerFile(1.U)
 
   when(io.writeEnable){
     registerFile(io.writeSel) := io.writeData

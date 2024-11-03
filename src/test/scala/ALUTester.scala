@@ -23,10 +23,12 @@ class ALUTester (dut: ALU ) extends PeekPokeTester (dut) {
   poke(dut.io.x, 2.U)
   poke(dut.io.y, 2.U)
   poke(dut.io.sel, 3.U)
+  step (1)
   expect(dut.io.comp, 2==2)
 
   poke(dut.io.x, 0.U)
   poke(dut.io.sel, 4.U)
+  step (1)
   expect(dut.io.comp, 0==0)
 
 }

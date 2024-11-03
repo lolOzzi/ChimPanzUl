@@ -10,9 +10,9 @@ class ControlUnit extends Module {
     val StoreImd = Output(Bool())
     val ALUop = Output(UInt(3.W))
     val Jump = Output(Bool())
-    val MemRead = Output(Bool())
     val MemWrite = Output(Bool())
     val MemtoReg = Output(Bool())
+    val stop = Output(Bool())
   })
 
   io.RegDst := 0.U
@@ -20,9 +20,10 @@ class ControlUnit extends Module {
   io.ALUsrc := 0.U
   io.StoreImd := 0.U
   io.Jump := 0.U
-  io.MemRead := 0.U
   io.MemWrite := 0.U
   io.MemtoReg := 0.U
+  io.stop := 0.U
+  io.ALUop := 0.U
 
   switch(io.opcode) {
     is("b0000".U) { //ADD
@@ -62,7 +63,6 @@ class ControlUnit extends Module {
       io.ALUop := 5.U
       io.writeEnable := 1.U
       io.ALUsrc := 1.U
-      io.MemRead := 1.U
       io.MemtoReg := 1.U
     }
     is("b0111".U) { //SD
@@ -93,6 +93,8 @@ class ControlUnit extends Module {
       io.ALUop := 5.U
     }
     is("b1111".U) { //END
+      io.ALUop := 5.U
+      io.stop := 1.U
     }
   }
 
