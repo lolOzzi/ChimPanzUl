@@ -1,4 +1,5 @@
 import chisel3._
+import chisel3.experimental._
 import chisel3.util._
 
 class CPUTop extends Module {
@@ -17,7 +18,21 @@ class CPUTop extends Module {
     val testerProgMemDataRead = Output(UInt (32.W))
     val testerProgMemWriteEnable = Input(Bool ())
     val testerProgMemDataWrite = Input(UInt (32.W))
-    val testR3 = Output(UInt (32.W));
+
+    val testR0 = Output(UInt (32.W))
+    val testR1 = Output(UInt (32.W))
+    val ALUopTest = Output(UInt(3.W))
+
+    val aSelTest = Output(UInt(5.W))
+    val bSelTest = Output(UInt(5.W))
+
+    val writeEnableTest = Output(Bool())
+    val writeSelTest = Output(UInt(4.W))
+    val writeDataTest = Output(UInt(32.W))
+
+    val instruction = Input(UInt (32.W))
+    val opOut = Output(UInt (32.W))
+    //val inst = Input(32.W)
   })
 
   //Creating components
@@ -34,22 +49,34 @@ class CPUTop extends Module {
   programCounter.io.stop := controlUnit.io.stop
   io.done := controlUnit.io.stop
   programMemory.io.address := programCounter.io.programCounter
-  val inst = programMemory.io.instructionRead
-  controlUnit.io.opcode := inst(31, 28)
-  registerFile.io.aSel := inst(27, 23)
-  registerFile.io.bSel := inst(22, 18)
-  registerFile.io.writeSel := Mux(controlUnit.io.RegDst,inst(22, 18), inst(18, 13))
+  //val inst = programMemory.io.instructionRead
+  controlUnit.io.opcode := io.instruction(31, 28)
+  io.opOut := controlUnit.io.opcode
+  registerFile.io.aSel := io.instruction(27, 23)
+  registerFile.io.bSel := io.instruction(22, 18)
+  registerFile.io.writeSel := Mux(controlUnit.io.RegDst, io.instruction(22, 18), io.instruction(18, 13))
   programCounter.io.jump := controlUnit.io.Jump & alu.io.comp
-  programCounter.io.programCounterJump := inst(17, 0)
+  programCounter.io.programCounterJump := io.instruction(17, 0)
   alu.io.x := registerFile.io.a
-  alu.io.y := Mux(controlUnit.io.ALUsrc,registerFile.io.b, inst(17, 0))
-  alu.io.sel := controlUnit.io.ALUop;
-  dataMemory.io.address := alu.io.res
-  dataMemory.io.dataWrite := Mux(controlUnit.io.StoreImd, inst(17,0), registerFile.io.b)
+  alu.io.y := Mux(controlUnit.io.ALUsrc,registerFile.io.b, io.instruction(17, 0))
+  alu.io.sel := controlUnit.io.ALUop
   dataMemory.io.writeEnable := controlUnit.io.MemWrite
+  dataMemory.io.address := alu.io.res
+  dataMemory.io.dataWrite := Mux(controlUnit.io.StoreImd, io.instruction(17,0).pad(32), registerFile.io.b)
+
   registerFile.io.writeData := Mux(controlUnit.io.MemtoReg, dataMemory.io.dataRead, alu.io.res)
   registerFile.io.writeEnable := controlUnit.io.writeEnable
-  io.testR3 := registerFile.io.r3
+
+  io.testR0 := registerFile.io.r0
+  io.testR1 := registerFile.io.r1
+  io.ALUopTest := controlUnit.io.ALUop
+
+  io.aSelTest := registerFile.io.aSel
+  io.bSelTest := registerFile.io.bSel
+
+  io.writeEnableTest := registerFile.io.writeEnable
+  io.writeSelTest := registerFile.io.writeSel
+  io.writeDataTest := registerFile.io.writeData
 
 
   //This signals are used by the tester for loading the program to the program memory, do not touch

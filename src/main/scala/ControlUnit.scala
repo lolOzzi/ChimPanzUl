@@ -58,6 +58,9 @@ class ControlUnit extends Module {
       io.writeEnable := 1.U
       io.ALUsrc := 1.U
       io.StoreImd := 1.U
+      io.RegDst := 1.U
+      io.MemWrite :=  1.U
+      io.MemtoReg := 1.U
     }
     is("b0110".U) { //LD
       io.ALUop := 5.U

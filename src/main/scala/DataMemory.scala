@@ -15,7 +15,7 @@ class DataMemory extends Module {
     val testerDataWrite = Input(UInt (32.W))
   })
 
-  val memory = Mem (65536 , UInt (32.W))
+  val memory = Mem (65536, UInt (32.W))
 
   when(io.testerEnable){
     //Tester mode
