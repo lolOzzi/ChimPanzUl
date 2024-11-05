@@ -19,19 +19,18 @@ class CPUTop extends Module {
     val testerProgMemWriteEnable = Input(Bool ())
     val testerProgMemDataWrite = Input(UInt (32.W))
 
-    val testR0 = Output(UInt (32.W))
-    val testR1 = Output(UInt (32.W))
+    // For testing
+    val testRa = Output(UInt (32.W))
+    val testRb = Output(UInt (32.W))
     val ALUopTest = Output(UInt(3.W))
-
     val aSelTest = Output(UInt(5.W))
     val bSelTest = Output(UInt(5.W))
-
     val writeEnableTest = Output(Bool())
     val writeSelTest = Output(UInt(4.W))
     val writeDataTest = Output(UInt(32.W))
-
     val instruction = Input(UInt (32.W))
     val opOut = Output(UInt (32.W))
+    val addressTest = Output(UInt (16.W))
     //val inst = Input(32.W)
   })
 
@@ -54,7 +53,7 @@ class CPUTop extends Module {
   io.opOut := controlUnit.io.opcode
   registerFile.io.aSel := io.instruction(27, 23)
   registerFile.io.bSel := io.instruction(22, 18)
-  registerFile.io.writeSel := Mux(controlUnit.io.RegDst, io.instruction(22, 18), io.instruction(18, 13))
+  registerFile.io.writeSel := Mux(controlUnit.io.RegDst, io.instruction(22, 18), io.instruction(17, 13))
   programCounter.io.jump := controlUnit.io.Jump & alu.io.comp
   programCounter.io.programCounterJump := io.instruction(17, 0)
   alu.io.x := registerFile.io.a
@@ -67,16 +66,16 @@ class CPUTop extends Module {
   registerFile.io.writeData := Mux(controlUnit.io.MemtoReg, dataMemory.io.dataRead, alu.io.res)
   registerFile.io.writeEnable := controlUnit.io.writeEnable
 
-  io.testR0 := registerFile.io.r0
-  io.testR1 := registerFile.io.r1
+  // For testing
+  io.testRa := registerFile.io.a
+  io.testRb := registerFile.io.b
   io.ALUopTest := controlUnit.io.ALUop
-
   io.aSelTest := registerFile.io.aSel
   io.bSelTest := registerFile.io.bSel
-
   io.writeEnableTest := registerFile.io.writeEnable
   io.writeSelTest := registerFile.io.writeSel
   io.writeDataTest := registerFile.io.writeData
+  io.addressTest := dataMemory.io.address
 
 
   //This signals are used by the tester for loading the program to the program memory, do not touch

@@ -65,17 +65,15 @@ class ControlUnit extends Module {
     is("b0110".U) { //LD
       io.ALUop := 5.U
       io.writeEnable := 1.U
-      io.ALUsrc := 1.U
       io.MemtoReg := 1.U
+      io.RegDst := 1.U
     }
     is("b0111".U) { //SD
       io.ALUop := 5.U
-      io.ALUsrc := 1.U
       io.MemWrite := 1.U
     }
     is("b1000".U) { //SI
       io.ALUop := 5.U
-      io.ALUsrc := 1.U
       io.MemWrite := 1.U
       io.StoreImd := 1.U
     }
@@ -96,6 +94,10 @@ class ControlUnit extends Module {
       io.ALUop := 5.U
     }
     is("b1111".U) { //END
+      io.ALUop := 5.U
+      io.stop := 1.U
+    }
+    is("b1101".U) { //RR
       io.ALUop := 5.U
       io.stop := 1.U
     }
