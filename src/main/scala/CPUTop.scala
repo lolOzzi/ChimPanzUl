@@ -28,10 +28,11 @@ class CPUTop extends Module {
     val writeEnableTest = Output(Bool())
     val writeSelTest = Output(UInt(4.W))
     val writeDataTest = Output(UInt(32.W))
-    val instruction = Input(UInt (32.W))
+    val instructionTest = Output(UInt (32.W))
+    val forceInstTest = Input(Bool ())
+    val forceInstruction = Input(UInt (32.W))
     val opOut = Output(UInt (32.W))
     val addressTest = Output(UInt (16.W))
-    //val inst = Input(32.W)
   })
 
   //Creating components
@@ -42,6 +43,17 @@ class CPUTop extends Module {
   val controlUnit = Module(new ControlUnit())
   val alu = Module(new ALU())
 
+  var instruction = RegInit(0.U(32.W))
+
+  when(!io.run){
+    instruction := "b11000000000000000000000000000000".U(32.W) // Nop
+  }.elsewhen (programMemory.io.testerEnable){
+    instruction := programMemory.io.testerDataRead
+  }.otherwise{
+    instruction := programMemory.io.instructionRead
+  }
+  io.instructionTest := instruction
+
 
   //Connecting the modules
   programCounter.io.run := io.run
@@ -49,19 +61,19 @@ class CPUTop extends Module {
   io.done := controlUnit.io.stop
   programMemory.io.address := programCounter.io.programCounter
   //val inst = programMemory.io.instructionRead
-  controlUnit.io.opcode := io.instruction(31, 28)
+  controlUnit.io.opcode := instruction(31, 28)
   io.opOut := controlUnit.io.opcode
-  registerFile.io.aSel := io.instruction(27, 23)
-  registerFile.io.bSel := io.instruction(22, 18)
-  registerFile.io.writeSel := Mux(controlUnit.io.RegDst, io.instruction(22, 18), io.instruction(17, 13))
+  registerFile.io.aSel := instruction(27, 23)
+  registerFile.io.bSel := instruction(22, 18)
+  registerFile.io.writeSel := Mux(controlUnit.io.RegDst, instruction(22, 18), instruction(17, 13))
   programCounter.io.jump := controlUnit.io.Jump & alu.io.comp
-  programCounter.io.programCounterJump := io.instruction(17, 0)
+  programCounter.io.programCounterJump := instruction(17, 0)
   alu.io.x := registerFile.io.a
-  alu.io.y := Mux(controlUnit.io.ALUsrc,registerFile.io.b, io.instruction(17, 0))
+  alu.io.y := Mux(controlUnit.io.ALUsrc,registerFile.io.b, instruction(17, 0))
   alu.io.sel := controlUnit.io.ALUop
   dataMemory.io.writeEnable := controlUnit.io.MemWrite
   dataMemory.io.address := alu.io.res
-  dataMemory.io.dataWrite := Mux(controlUnit.io.StoreImd, io.instruction(17,0).pad(32), registerFile.io.b)
+  dataMemory.io.dataWrite := Mux(controlUnit.io.StoreImd, instruction(17,0), registerFile.io.b)
 
   registerFile.io.writeData := Mux(controlUnit.io.MemtoReg, dataMemory.io.dataRead, alu.io.res)
   registerFile.io.writeEnable := controlUnit.io.writeEnable
