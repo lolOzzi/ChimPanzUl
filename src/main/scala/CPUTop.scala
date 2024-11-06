@@ -29,10 +29,14 @@ class CPUTop extends Module {
     val writeSelTest = Output(UInt(4.W))
     val writeDataTest = Output(UInt(32.W))
     val instructionTest = Output(UInt (32.W))
-    val forceInstTest = Input(Bool ())
-    val forceInstruction = Input(UInt (32.W))
+    val somethingHappening = Output(Bool ())
     val opOut = Output(UInt (32.W))
     val addressTest = Output(UInt (16.W))
+    val programCounterTest = Output(UInt(18.W))
+
+    val readingImg = Input(Bool())
+    val memoryReaderAdd = Input(UInt(32.W))
+    val readImg = Output(UInt(32.W))
   })
 
   //Creating components
@@ -45,29 +49,36 @@ class CPUTop extends Module {
 
   var instruction = RegInit(0.U(32.W))
 
-  when(!io.run){
-    instruction := "b11000000000000000000000000000000".U(32.W) // Nop
-  }.elsewhen (programMemory.io.testerEnable){
-    instruction := programMemory.io.testerDataRead
-  }.otherwise{
-    instruction := programMemory.io.instructionRead
+  programCounter.io.jump := controlUnit.io.Jump & alu.io.comp
+  programCounter.io.programCounterJump := instruction(17, 0)
+
+
+  when(programCounter.io.jump){
+    programMemory.io.address := programCounter.io.programCounterJump
+  }.otherwise {
+    programMemory.io.address := programCounter.io.programCounter
   }
+
+  instruction := programMemory.io.instructionRead
   io.instructionTest := instruction
 
+  when(instruction === 0.U(32.W)){
+    programCounter.io.stop := 1.U
+    io.somethingHappening := 1.U
+  }.otherwise{
+    programCounter.io.stop := controlUnit.io.stop
+    io.somethingHappening := 0.U
+  }
 
   //Connecting the modules
   programCounter.io.run := io.run
-  programCounter.io.stop := controlUnit.io.stop
-  io.done := controlUnit.io.stop
-  programMemory.io.address := programCounter.io.programCounter
-  //val inst = programMemory.io.instructionRead
+  io.done := programCounter.io.stop
   controlUnit.io.opcode := instruction(31, 28)
   io.opOut := controlUnit.io.opcode
   registerFile.io.aSel := instruction(27, 23)
   registerFile.io.bSel := instruction(22, 18)
   registerFile.io.writeSel := Mux(controlUnit.io.RegDst, instruction(22, 18), instruction(17, 13))
-  programCounter.io.jump := controlUnit.io.Jump & alu.io.comp
-  programCounter.io.programCounterJump := instruction(17, 0)
+
   alu.io.x := registerFile.io.a
   alu.io.y := Mux(controlUnit.io.ALUsrc,registerFile.io.b, instruction(17, 0))
   alu.io.sel := controlUnit.io.ALUop
@@ -88,6 +99,16 @@ class CPUTop extends Module {
   io.writeSelTest := registerFile.io.writeSel
   io.writeDataTest := registerFile.io.writeData
   io.addressTest := dataMemory.io.address
+  io.programCounterTest := programCounter.io.programCounter
+
+
+  when(io.readingImg){
+    dataMemory.io.address := io.memoryReaderAdd
+    io.readImg := dataMemory.io.dataRead
+  } otherwise{
+    io.readImg := 0.U
+  }
+
 
 
   //This signals are used by the tester for loading the program to the program memory, do not touch

@@ -120,7 +120,6 @@ class ActualCPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
   expect(dut.io.testRb, 4) // memory(R1) = 4
 
   poke(dut.io.run, 0)
-  poke(dut.io.forceInstTest, 0)
 }
 
 object ActualCPUTopTester {

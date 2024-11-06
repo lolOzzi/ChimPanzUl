@@ -97,10 +97,6 @@ class ControlUnit extends Module {
       io.ALUop := 5.U
       io.stop := 1.U
     }
-    is("b1101".U) { //RR
-      io.ALUop := 5.U
-      io.stop := 1.U
-    }
   }
 
 }

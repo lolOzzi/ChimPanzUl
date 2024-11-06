@@ -15,13 +15,10 @@ class ProgramCounter extends Module {
 
   when(!io.run || io.stop || io.programCounter >= "hffff".U(18.W)){
     programCounterNext := io.programCounter
-
   } .elsewhen(io.run && io.jump && !io.stop) {
     programCounterNext := io.programCounterJump
-
   } .otherwise{
     programCounterNext := io.programCounter + 1.U(1.W)
-
   }
   io.programCounter := programCounterNext
 }

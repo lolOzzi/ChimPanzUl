@@ -7,6 +7,7 @@ import java.util
 class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
   //Do not run the CPU
   poke(dut.io.run, 0)
+  poke(dut.io.readingImg, 0)
 
   //Load the data memory with image data
   System.out.print("\nLoading the data memory with image data... ")
@@ -28,14 +29,17 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
   //Load the program memory with instructions
   System.out.print("\nLoading the program memory with instructions... ")
   //Uncomment one of the following line depending on the program you want to load to the program memory
-  val program = Programs.program3
+  val program = Programs.program4
   //val program = Programs.program2
   for( address <- 0 to program.length-1){
+    /*
     poke(dut.io.testerProgMemEnable, 1)
     poke(dut.io.testerProgMemWriteEnable, 1)
     poke(dut.io.testerProgMemAddress, address)
     poke(dut.io.testerProgMemDataWrite, program(address))
     step(1)
+     */
+
   }
   poke(dut.io.testerProgMemEnable, 0)
   System.out.println("Done!")
@@ -43,21 +47,7 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
   //Run the simulation of the CPU
   System.out.println("\nRun the simulation of the CPU")
   //Start the CPU
-  poke(dut.io.run, 1)
-  var running = true
-  var maxInstructions = 20000
-  var instructionsCounter = maxInstructions
-  while(running) {
-    System.out.println("Running cycle: " + (maxInstructions - instructionsCounter))
-    System.out.println("Yo1: " + peek(dut.io.instructionTest))
-    System.out.println("Yo2: Sel " + peek(dut.io.bSelTest) + " Val " + peek(dut.io.testRb))
 
-    step(1)
-    instructionsCounter = instructionsCounter - 1
-    running = peek(dut.io.done) == 0 && instructionsCounter > 0
-  }
-  poke(dut.io.run, 0)
-  System.out.println(" - Done!") /*
 
   //Dump the data memory content
   System.out.print("\nDump the data memory content... ")
@@ -71,17 +61,41 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
     //System.out.println("a:" + i + " d:" + data )
     step(1)
   }
+
+  poke(dut.io.run, 1)
+  var running = true
+  var maxInstructions = 20000
+  var instructionsCounter = maxInstructions
+  //step(1)
+  while(running) {
+    System.out.println("Running cycle: " + (maxInstructions - instructionsCounter))
+    System.out.println("Prog Counter: " + peek(dut.io.programCounterTest))
+    System.out.println("Yo1: " + peek(dut.io.instructionTest))
+    System.out.println("Yo2: Sel " + peek(dut.io.bSelTest) + " Val " + peek(dut.io.testRb))
+    System.out.println("Yo3: " + peek(dut.io.somethingHappening))
+
+    step(1)
+    instructionsCounter = instructionsCounter - 1
+    running = peek(dut.io.done) == 0 && instructionsCounter > 0
+  }
+  poke(dut.io.run, 0)
+  System.out.println(" - Done!")
+
+  poke(dut.io.testerDataMemEnable, 0)
+
   val outputImage = new util.ArrayList[Int]
   for( i <- 400 to 799){ //Location of the processed image
-    poke(dut.io.testerDataMemEnable, 1)
-    poke(dut.io.testerDataMemWriteEnable, 0)
-    poke(dut.io.testerDataMemAddress, i)
-    val data = peek(dut.io.testerDataMemDataRead)
+    //poke(dut.io.testerDataMemEnable, 1)
+    //poke(dut.io.testerDataMemWriteEnable, 0)
+    poke(dut.io.readingImg, 1)
+    poke(dut.io.memoryReaderAdd, i)
+    val data = peek(dut.io.readImg)
     outputImage.add(data.toInt)
     //System.out.println("a:" + i + " d:" + data )
     step(1)
   }
-  poke(dut.io.testerDataMemEnable, 0)
+
+
   System.out.println("Done!")
 
   System.out.print("\r\n")
@@ -91,7 +105,7 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
   Images.printImage(outputImage)
 
   System.out.println("End of simulation")
-  */
+
 }
 
 object CPUTopTester {
