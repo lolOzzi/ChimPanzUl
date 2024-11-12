@@ -21,6 +21,7 @@ class ALU extends Module {
     is(4.U) { io.comp := io.x === 0.U }
     is(5.U) { io.res := io.x}
     is(6.U) { io.comp := true.B}
+    is(7.U) { io.res := io.y}
   }
 
 }

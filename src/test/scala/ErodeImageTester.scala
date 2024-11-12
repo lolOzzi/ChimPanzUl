@@ -24,7 +24,7 @@ class ErodeImageTester(dut: CPUTop) extends PeekPokeTester(dut) {
   //Load the program memory with instructions
   System.out.print("\nLoading the program memory with instructions... ")
   //Uncomment one of the following line depending on the program you want to load to the program memory
-  val program = Programs.OscarErode
+  val program = Programs.nopjump
   //val program = Programs.program2
   for( address <- 0 to program.length-1){
     poke(dut.io.testerProgMemEnable, 1)
@@ -56,8 +56,7 @@ class ErodeImageTester(dut: CPUTop) extends PeekPokeTester(dut) {
   poke(dut.io.testerDataMemEnable, 0)
   poke(dut.io.run, 1)
   var running = true
-  var maxInstructions = 500
-  var instructionsCounter = maxInstructions
+
   while(running) {
     step(1)
     if(peek(dut.io.dataWriteEnableTest) == 1){
@@ -69,9 +68,7 @@ class ErodeImageTester(dut: CPUTop) extends PeekPokeTester(dut) {
     //System.out.println("Data Memory Adress: " + peek(dut.io.addressTest))
     //System.out.println("Data To Write: " + peek(dut.io.dataWriteTest) + "\n")
 
-
-    instructionsCounter = instructionsCounter - 1
-    running = peek(dut.io.done) == 0 && instructionsCounter > 0
+    running = peek(dut.io.done) == 0
   }
   poke(dut.io.run, 0)
   System.out.println(" - Done!")
