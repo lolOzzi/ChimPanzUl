@@ -38,7 +38,7 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
     poke(dut.io.testerProgMemAddress, address)
     poke(dut.io.testerProgMemDataWrite, program(address))
     step(1)
-     */
+    */
 
   }
   poke(dut.io.testerProgMemEnable, 0)
@@ -73,7 +73,6 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
     System.out.println("Yo1: " + peek(dut.io.instructionTest))
     System.out.println("Yo2: Sel " + peek(dut.io.bSelTest) + " Val " + peek(dut.io.testRb))
     System.out.println("Yo3: " + peek(dut.io.somethingHappening))
-
     step(1)
     instructionsCounter = instructionsCounter - 1
     running = peek(dut.io.done) == 0 && instructionsCounter > 0
@@ -85,11 +84,10 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
 
   val outputImage = new util.ArrayList[Int]
   for( i <- 400 to 799){ //Location of the processed image
-    //poke(dut.io.testerDataMemEnable, 1)
-    //poke(dut.io.testerDataMemWriteEnable, 0)
-    poke(dut.io.readingImg, 1)
-    poke(dut.io.memoryReaderAdd, i)
-    val data = peek(dut.io.readImg)
+    poke(dut.io.testerDataMemEnable, 1)
+    poke(dut.io.testerDataMemWriteEnable, 0)
+    poke(dut.io.testerDataMemAddress, i)
+    val data = peek(dut.io.testerDataMemDataRead)
     outputImage.add(data.toInt)
     //System.out.println("a:" + i + " d:" + data )
     step(1)

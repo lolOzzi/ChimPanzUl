@@ -33,7 +33,6 @@ class DataMemory extends Module {
       memory.write(io.address, io.dataWrite)
       io.dataRead := io.dataWrite
     }
-
   }
 
 }
