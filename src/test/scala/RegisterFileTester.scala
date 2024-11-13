@@ -21,7 +21,6 @@ class RegisterFileTester(dut: RegisterFile) extends PeekPokeTester(dut) {
 
   expect(dut.io.a, 2)
   expect(dut.io.b, 0)
-
 }
 
 object RegisterFileTester {

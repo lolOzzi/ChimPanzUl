@@ -1,4 +1,3 @@
-import chisel3._
 import chisel3.iotesters
 import chisel3.iotesters.PeekPokeTester
 
@@ -10,9 +9,6 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
 
   //Load the data memory with image data
   System.out.print("\nLoading the data memory with image data... ")
-  //Uncomment one of the following line depending on the image you want to load to the data memory
-  //var image = Images.blackImage
-  //var image = Images.whiteImage
   var image = Images.cellsImage
   //var image = Images.borderCellsImage
   for( address <- 0 to image.length-1){
@@ -28,17 +24,14 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
   //Load the program memory with instructions
   System.out.print("\nLoading the program memory with instructions... ")
   //Uncomment one of the following line depending on the program you want to load to the program memory
-  val program = Programs.program4
+  val program = Programs.nopjump
   //val program = Programs.program2
   for( address <- 0 to program.length-1){
-    /*
     poke(dut.io.testerProgMemEnable, 1)
     poke(dut.io.testerProgMemWriteEnable, 1)
     poke(dut.io.testerProgMemAddress, address)
     poke(dut.io.testerProgMemDataWrite, program(address))
     step(1)
-    */
-
   }
   poke(dut.io.testerProgMemEnable, 0)
   System.out.println("Done!")
@@ -46,7 +39,6 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
   //Run the simulation of the CPU
   System.out.println("\nRun the simulation of the CPU")
   //Start the CPU
-
 
   //Dump the data memory content
   System.out.print("\nDump the data memory content... ")
@@ -61,23 +53,22 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
     step(1)
   }
 
+  poke(dut.io.testerDataMemEnable, 0)
   poke(dut.io.run, 1)
   var running = true
-  var maxInstructions = 20000
-  var instructionsCounter = maxInstructions
-  //step(1)
+
   while(running) {
-    System.out.println("Running cycle: " + (maxInstructions - instructionsCounter))
-    System.out.println("Yo1: " + peek(dut.io.instructionTest))
-    System.out.println("Yo2: Sel " + peek(dut.io.bSelTest) + " Val " + peek(dut.io.testRb))
     step(1)
-    instructionsCounter = instructionsCounter - 1
-    running = peek(dut.io.done) == 0 && instructionsCounter > 0
+    if(peek(dut.io.dataWriteEnableTest) == 1){
+      System.out.println("Data Memory Adress: " + peek(dut.io.addressTest))
+      System.out.println("Data To Write: " + peek(dut.io.dataWriteTest) + "\n")
+    }
+    running = peek(dut.io.done) == 0
   }
   poke(dut.io.run, 0)
   System.out.println(" - Done!")
 
-  poke(dut.io.testerDataMemEnable, 0)
+
 
   val outputImage = new util.ArrayList[Int]
   for( i <- 400 to 799){ //Location of the processed image
@@ -98,18 +89,16 @@ class CPUTopTester(dut: CPUTop) extends PeekPokeTester(dut) {
   Images.printImage(inputImage)
   System.out.println("Processed image from address 400 to 799:")
   Images.printImage(outputImage)
-
   System.out.println("End of simulation")
-
 }
 
 object CPUTopTester {
   def main(args: Array[String]): Unit = {
-    println("Testing the full CPU")
+    println("Testing the Erode Image")
     iotesters.Driver.execute(
       Array("--generate-vcd-output", "on",
         "--target-dir", "generated",
-        "--top-name", "CPUTop"),
+        "--top-name", "CPUTopTester"),
       () => new CPUTop()) {
       c => new CPUTopTester(c)
     }
