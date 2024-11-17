@@ -26,7 +26,7 @@ class CPUTop extends Module {
     val aSelTest = Output(UInt(5.W))
     val bSelTest = Output(UInt(5.W))
     val writeEnableTest = Output(Bool())
-    val writeSelTest = Output(UInt(4.W))
+    val writeSelTest = Output(UInt(5.W))
     val writeDataTest = Output(UInt(32.W))
     val instructionTest = Output(UInt (32.W))
     val opOut = Output(UInt (32.W))
@@ -45,7 +45,7 @@ class CPUTop extends Module {
 
   var instruction = RegInit(0.U(32.W))
 
-  when(!io.run){
+  when(!io.run){ // Counted as Mux when in production, where sel is io.Run
     instruction := "b11000000000000000000000000000000".U(32.W) // Nop
   }.elsewhen (programMemory.io.testerEnable){
     instruction := programMemory.io.testerDataRead
